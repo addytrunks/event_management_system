@@ -239,8 +239,8 @@ def apply_custom_css():
 def connect_db():
     return pymysql.connect(
         host="localhost",
-        user="root",  # Change this to your MySQL username
-        password="adhithya1234",  # Change this to your MySQL password
+        user="root", 
+        password="adhithya1234",
         database="event_management"
     )
 
@@ -305,7 +305,6 @@ def login(user_type):
                 st.session_state["user_id"] = user["organizer_id"] if user_type == "Organizer" else user["customer_id"]
                 st.session_state["user_name"] = user['first_name']
                 
-                # Success message with animation
                 st.markdown(
                     """
                     <div style="display: flex; justify-content: center; align-items: center; margin: 2rem 0;">
@@ -334,7 +333,17 @@ def login(user_type):
 def register(user_type):
     st.markdown(f'<h2 class="decorated-header">{user_type} Registration</h2>', unsafe_allow_html=True)
     
-    # Create a card-like effect for the registration form
+    if st.session_state.get("registration_success",False):
+        st.markdown(
+            f"""
+            <div style="background-color: #d1fae5; border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                <p style="color: #065f46; font-weight: 500; margin: 0;">{st.session_state["registration_success"]}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        del st.session_state["registration_success"]
+    
     st.markdown('<div class="card">', unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 1])
@@ -348,7 +357,6 @@ def register(user_type):
         password = st.text_input("Password", type="password", placeholder="Create a password")
         phone_no = st.text_input("Phone Number", placeholder="Enter your phone number")
         
-        # Empty space to align the register button
         st.write("")
     
     col_btn1, col_btn2, col_btn3 = st.columns([2, 2, 1])
@@ -379,19 +387,7 @@ def register(user_type):
             cursor.execute(f"INSERT INTO {table} (first_name, last_name, email, password, phone_no) VALUES (%s, %s, %s, %s, %s)",
                            (first_name, last_name, email, hashed_pw, phone_no))
             db.commit()
-            
-            # Success message with animation
-            st.markdown(
-                """
-                <div style="display: flex; justify-content: center; align-items: center; margin: 2rem 0;">
-                    <div style="background-color: #d1fae5; border-radius: 8px; padding: 1rem; text-align: center;">
-                        <span style="font-size: 3rem;">🎉</span>
-                        <p style="color: #065f46; font-weight: 600; margin-top: 0.5rem;">Registration Successful!</p>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            st.session_state["registration_success"] = "Registration successful! You can now log in."
             
             # Auto-redirect to login
             st.session_state['show_login'] = True
